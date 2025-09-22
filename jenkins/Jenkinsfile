@@ -1,0 +1,55 @@
+pipeline {
+  agent { docker { image 'jenkins/agent:latest' } }
+  environment {
+    JFROG_URL = credentials('jfrog-url')
+    JFROG_USER = credentials('jfrog-user')
+    JFROG_PASSWORD = credentials('jfrog-password')
+  }
+  stages {
+    stage('Unit Test') {
+      steps {
+        sh 'mvn test'
+      }
+    }
+    stage('Build') {
+      steps {
+        sh 'mvn clean package'
+      }
+    }
+    stage('SonarQube Analysis') {
+      environment {
+        SONAR_TOKEN = credentials('sonar-token')
+      }
+      steps {
+        sh 'mvn sonar:sonar -Dsonar.projectKey=microservices -Dsonar.host.url=http://sonarqube:9000 -Dsonar.login=$SONAR_TOKEN'
+      }
+    }
+    stage('Docker Build & Push') {
+      steps {
+        checkout scm
+        sh 'docker build -t $JFROG_URL/microservices:${GIT_COMMIT} .'
+        sh 'docker login -u $JFROG_USER -p $JFROG_PASSWORD $JFROG_URL'
+        sh 'docker push $JFROG_URL/microservices:${GIT_COMMIT}'
+      }
+    }
+    stage('Deploy') {
+      steps {
+        script {
+          def envMap = [
+            'main': 'prod',
+            'develop': 'dev',
+            'qa': 'qa'
+          ]
+          def targetEnv = envMap.get(env.BRANCH_NAME, 'dev')
+          echo "Deploying to environment: ${targetEnv}"
+          sh "kubectl apply -f k8s/${targetEnv}/"
+        }
+      }
+    }
+  }
+  post {
+    always {
+      cleanWs()
+    }
+  }
+}

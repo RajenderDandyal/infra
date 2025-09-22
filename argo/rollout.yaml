@@ -1,0 +1,27 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: microservice-rollout
+spec:
+  replicas: 3
+  strategy:
+    canary:
+      steps:
+      - setWeight: 20
+      - pause: {duration: 10m}
+      - setWeight: 50
+      - pause: {duration: 10m}
+      - setWeight: 100
+  selector:
+    matchLabels:
+      app: microservice
+  template:
+    metadata:
+      labels:
+        app: microservice
+    spec:
+      containers:
+      - name: microservice
+        image: <JFROG_URL>/microservices:{{ .Values.env }} # Replace with actual JFrog URL and env
+        ports:
+        - containerPort: 8080

@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: microservice-dev
+  namespace: dev
+spec:
+  rules:
+    - host: dev.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: microservice-dev
+                port:
+                  number: 80

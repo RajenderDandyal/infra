@@ -1,0 +1,11 @@
+# Jenkins plugins for CI/CD infrastructure
+workflow-aggregator
+kubernetes
+docker-plugin
+git
+github
+blueocean
+credentials-binding
+pipeline-github-lib
+pipeline-utility-steps
+artifactory

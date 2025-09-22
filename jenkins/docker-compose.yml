@@ -1,0 +1,65 @@
+version: '3.8'
+services:
+  jenkins-master:
+    image: jenkins/jenkins:lts
+    container_name: jenkins-master
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - ./plugins.txt:/usr/share/jenkins/ref/plugins.txt
+    entrypoint: ["/bin/bash", "-c", "jenkins-plugin-cli --plugins-file /usr/share/jenkins/ref/plugins.txt && /usr/bin/tini -- /usr/local/bin/jenkins.sh"]
+    networks:
+      - jenkins-net
+  jenkins-slave1:
+    image: jenkins/agent:latest
+    container_name: jenkins-slave1
+    environment:
+      - JENKINS_URL=http://jenkins-master:8080
+    networks:
+      - jenkins-net
+  jenkins-slave2:
+    image: jenkins/agent:latest
+    container_name: jenkins-slave2
+    environment:
+      - JENKINS_URL=http://jenkins-master:8080
+    networks:
+      - jenkins-net
+  sonarqube:
+    image: sonarqube:community
+    container_name: sonarqube
+    depends_on:
+      - db
+    environment:
+      - SONAR_JDBC_URL=jdbc:postgresql://db:5432/sonar
+      - SONAR_JDBC_USERNAME=sonar
+      - SONAR_JDBC_PASSWORD=sonar
+    ports:
+      - "9000:9000"
+    networks:
+      - jenkins-net
+    volumes:
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_extensions:/opt/sonarqube/extensions
+      - sonarqube_logs:/opt/sonarqube/logs
+  db:
+    image: postgres:15
+    container_name: sonarqube-db
+    environment:
+      - POSTGRES_USER=sonar
+      - POSTGRES_PASSWORD=sonar
+      - POSTGRES_DB=sonar
+    networks:
+      - jenkins-net
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+volumes:
+  jenkins_home:
+  sonarqube_data:
+  sonarqube_extensions:
+  sonarqube_logs:
+  postgres_data:
+networks:
+  jenkins-net:
+    driver: bridge
