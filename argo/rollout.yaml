@@ -25,3 +25,32 @@ spec:
         image: <JFROG_URL>/microservices:{{ .Values.env }} # Replace with actual JFrog URL and env
         ports:
         - containerPort: 8080
+
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: nx-react-rollout
+spec:
+  replicas: 3
+  strategy:
+    canary:
+      steps:
+      - setWeight: 20
+      - pause: {duration: 10m}
+      - setWeight: 50
+      - pause: {duration: 10m}
+      - setWeight: 100
+  selector:
+    matchLabels:
+      app: nx-react
+  template:
+    metadata:
+      labels:
+        app: nx-react
+    spec:
+      containers:
+      - name: nx-react
+        image: <JFROG_URL>/nx-react:{{ .Values.env }} # Replace with actual JFrog URL and env
+        ports:
+        - containerPort: 3000

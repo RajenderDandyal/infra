@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nx-react-prod
+  namespace: prod
+spec:
+  rules:
+    - host: nx-prod.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: nx-react-prod
+                port:
+                  number: 80

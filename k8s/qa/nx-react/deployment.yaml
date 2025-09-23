@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nx-react-qa
+  namespace: qa
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nx-react
+  template:
+    metadata:
+      labels:
+        app: nx-react
+    spec:
+      containers:
+      - name: nx-react
+        image: <JFROG_URL>/nx-react:qa # Replace with actual JFrog URL
+        ports:
+        - containerPort: 3000

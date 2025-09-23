@@ -1,0 +1,12 @@
+Production-Grade Recommendations:
+
+Use HTTPS and secure credentials/secrets everywhere (Jenkins, JFrog, SonarQube, etc.).
+Add resource limits/requests and readiness/liveness probes to Kubernetes deployments.
+Implement RBAC and network policies in Kubernetes.
+Use managed databases and storage for SonarQube and Jenkins.
+Set up monitoring/logging (Prometheus, Grafana, ELK, etc.).
+Automate backup and disaster recovery for stateful services.
+Use Terraform remote state and state locking.
+Harden Docker images (scan for vulnerabilities, use minimal base images).
+Enable audit logging and access controls in all tools.
+Document operational runbooks and incident response.

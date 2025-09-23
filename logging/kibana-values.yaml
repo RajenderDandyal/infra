@@ -1,0 +1,8 @@
+# Example Kibana custom values for production
+resources:
+  requests:
+    cpu: 100m
+    memory: 512Mi
+  limits:
+    cpu: 500m
+    memory: 2Gi
