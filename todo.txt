@@ -10,3 +10,4 @@ Use Terraform remote state and state locking.
 Harden Docker images (scan for vulnerabilities, use minimal base images).
 Enable audit logging and access controls in all tools.
 Document operational runbooks and incident response.
+Jenkins admin rajender/rajender for local testing

@@ -1,0 +1,50 @@
+pipeline {
+  agent { docker { image 'jenkins/agent:latest' } }
+  environment {
+    DOCKERHUB_USER = credentials('dockerhub-user')
+    DOCKERHUB_PASSWORD = credentials('dockerhub-password')
+  }
+  stages {
+    stage('Install Dependencies') {
+      steps {
+        sh 'npm install'
+      }
+    }
+    stage('Unit Test') {
+      steps {
+        sh 'npx nx test'
+      }
+    }
+    stage('Lint') {
+      steps {
+        sh 'npx nx lint'
+      }
+    }
+    stage('SonarQube Analysis') {
+      environment {
+        SONAR_TOKEN = credentials('sonar-token')
+      }
+      steps {
+        sh 'npx nx run-many --target=sonar --all -- --sonarToken=$SONAR_TOKEN --sonarHostUrl=http://sonarqube:9000'
+      }
+    }
+    stage('Build') {
+      steps {
+        sh 'npx nx build'
+      }
+    }
+    stage('Docker Build & Push') {
+      steps {
+        checkout scm
+        sh 'docker build -t $DOCKERHUB_USER/nx-react:${GIT_COMMIT} .'
+        sh 'echo $DOCKERHUB_PASSWORD | docker login -u $DOCKERHUB_USER --password-stdin'
+        sh 'docker push $DOCKERHUB_USER/nx-react:${GIT_COMMIT}'
+      }
+    }
+  }
+  post {
+    always {
+      cleanWs()
+    }
+  }
+}
