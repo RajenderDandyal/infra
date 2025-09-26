@@ -1,31 +1,24 @@
 version: '3.8'
 services:
   jenkins-master:
-    image: jenkins/jenkins:lts
+    image: rajenderdandyal/jenkins-repo:jenkins-master
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile.master
     container_name: jenkins-master
+    privileged: true
+    user: root
     ports:
       - "8080:8080"
       - "50000:50000"
     volumes:
       - jenkins_home:/var/jenkins_home
       - ./plugins.txt:/usr/share/jenkins/ref/plugins.txt
+      - /var/run/docker.sock:/var/run/docker.sock
     entrypoint: ["/bin/bash", "-c", "jenkins-plugin-cli --plugin-file /usr/share/jenkins/ref/plugins.txt && /usr/bin/tini -- /usr/local/bin/jenkins.sh"]
     networks:
       - jenkins-net
-  jenkins-slave1:
-    image: jenkins/agent:latest
-    container_name: jenkins-slave1
-    environment:
-      - JENKINS_URL=http://jenkins-master:8080
-    networks:
-      - jenkins-net
-  jenkins-slave2:
-    image: jenkins/agent:latest
-    container_name: jenkins-slave2
-    environment:
-      - JENKINS_URL=http://jenkins-master:8080
-    networks:
-      - jenkins-net
+  
   sonarqube:
     image: sonarqube:community
     container_name: sonarqube
@@ -62,4 +55,5 @@ volumes:
   postgres_data:
 networks:
   jenkins-net:
+    name: jenkins-net
     driver: bridge

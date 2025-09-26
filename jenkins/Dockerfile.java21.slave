@@ -1,0 +1,19 @@
+
+FROM maven:4.0.0-rc-4-amazoncorretto-21
+
+# Switch to the root user to install packages
+USER root
+
+# Install Docker using amazon-linux-extras, which is the recommended way for Amazon Linux
+RUN yum update -y && \
+    amazon-linux-extras install docker -y
+
+# Create a jenkins user and group, as the base image does not have one
+RUN groupadd -g 1000 jenkins && \
+    useradd -u 1000 -g jenkins -m -s /bin/bash jenkins
+
+# Add the jenkins user to the docker group to run Docker commands
+RUN usermod -aG docker jenkins
+
+# Switch back to the jenkins user
+USER jenkins

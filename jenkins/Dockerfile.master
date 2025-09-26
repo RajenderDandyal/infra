@@ -1,0 +1,21 @@
+# Start from the official Jenkins controller image
+FROM jenkins/jenkins:lts
+
+# Switch to the root user to install packages
+USER root
+
+# Install the Docker CLI
+# We follow the official Docker installation guide: https://docs.docker.com/engine/install/debian/
+RUN apt-get update && apt-get install -y lsb-release
+RUN curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+RUN echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/debian \
+  $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+RUN apt-get update && apt-get install -y docker-ce-cli
+
+# Important: Add the 'jenkins' user to the 'docker' group
+# This step might not be strictly necessary depending on permissions, but it's good practice.
+# We need to find the docker group GID from the host, but for now we'll try without it.
+
+# Switch back to the jenkins user
+USER jenkins
